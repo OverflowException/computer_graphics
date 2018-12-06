@@ -39,11 +39,12 @@ int main(int argc, char** argv)
     {
       idx %= 16;
       
-      usleep(100000);
+      usleep(500000);
       system("clear");
       
       drawLine(p0, pArr[idx], canvas, '*');
       drawCircle(p0, idx, canvas, '#');
+      drawElipse(p0, idx, idx / 2, canvas, '&');
       
       outImage(canvas);
       clearImage(canvas, ' ');

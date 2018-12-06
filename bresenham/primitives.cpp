@@ -1,6 +1,8 @@
 #include "image_utility.h"
 #include "primitives.h"
 #include <functional>
+#include <cmath>
+#include <iostream>
 
 //This is a table dealing with Flipping transformations
 std::function<Point(Point)> lineTrans[4] =
@@ -70,11 +72,11 @@ void drawLine(Point p1, Point p2, Image& im, char c)
   //setPixel(lineTrans[transIdx](p2), im, c);
 }
 
-void drawCircle(Point center, int radius, Image& im, char c)
+void drawCircle(Point center, int r, Image& im, char c)
 {
-  int p = 1 - radius;
+  int p = 1 - r;
   
-  for(int x = 0, y = radius; x <= y; ++x)
+  for(int x = 0, y = r; x <= y; ++x)
     {
       setOctPixel(Point(x, y), center, im, c);
 
@@ -85,5 +87,41 @@ void drawCircle(Point center, int radius, Image& im, char c)
 	  p += 2 * (x - y) + 5;
 	  --y;
 	}
+    }
+}
+
+
+void drawElipse(Point center, int rx, int ry, Image& im, char c)
+{
+  //Some frequently used constants
+  int rx2 = rx * rx;
+  int ry2 = ry * ry;
+  int tworx2 = 2 * rx2;
+  int twory2 = 2 * ry2;
+  int threery2 = 3 * ry2;
+  int threerx2 = 3 * rx2;
+  
+  int dx = 0;
+  int dy = tworx2 * ry;
+  int p;
+  
+  //abs(slope) < 1
+  int x = 0;
+  int y = ry;
+  p = round(ry2 - rx2 * ry + 0.25 * rx2);
+  for(; dx < dy; ++x)
+    {
+      setQuartPixel(Point(x, y), center, im, c);
+      
+      if(p < 0)
+	p += dx + threery2;
+      else
+	{
+	  p += dx + threery2 + tworx2 - dy;
+	  --y;
+	  dy -= tworx2;
+	}
+
+      dx += twory2;
     }
 }
