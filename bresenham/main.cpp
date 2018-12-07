@@ -18,14 +18,15 @@ Point center(mid.x, p3.y / 3);
 
 void init()
 {
-  glClearColor(0.0, 0.0, 0.0, 0.0);
+  glClearColor(0.2, 0.2, 0.2, 0.0);
+  glClear(GL_COLOR_BUFFER_BIT);
   glMatrixMode(GL_PROJECTION);
   gluOrtho2D(0.0, width, 0.0, height);
 }
 
 void display()
 {
-  glColor3f(1, 1, 1);
+  glColor3f(0, 1, 0);
   
   drawLine(p1, p2);
   drawLine(p2, p3);
