@@ -2,6 +2,7 @@
 #define _IMAGE_UTILITY_H
 
 #include <vector>
+#include <GL/glut.h>
 
 struct Point
 {
@@ -10,13 +11,26 @@ struct Point
 Point(int x = 0, int y = 0) : x(x), y(y){};
 };
 
-typedef std::vector<std::vector<char>> Image;
+inline void setPixel(Point p)
+{
+  glVertex2i(p.x, p.y);
+}
+  
+inline void setQuartPixel(Point p, Point center)
+{
+  glVertex2i(p.x + center.x, p.y + center.y);
+  glVertex2i(p.x + center.x, -p.y + center.y);
+  glVertex2i(-p.x + center.x, -p.y + center.y);
+  glVertex2i(-p.x + center.x, p.y + center.y);
+}
 
-void setPixel(Point p, Image& im, char c);
-void setOctPixel(Point p, Point center, Image& im, char c);
-void setQuartPixel(Point p, Point center, Image& im, char c);
+inline void setOctPixel(Point p, Point center)
+{
+  setQuartPixel(p, center);
+  setQuartPixel(Point(p.y, p.x), center);
+}
 
-void outImage(const Image& im);
-void clearImage(Image& im, char c);
+Point segPoint(Point p1, Point p2, float m);
+float distance(Point p1, Point p2);
 
 #endif

@@ -1,39 +1,16 @@
 #include "image_utility.h"
 #include <iostream>
+#include <GL/glut.h>
+#include <cmath>
 
-void setPixel(Point p, Image& im, char c)
+
+Point segPoint(Point p1, Point p2, float m)
 {
-  im[im.size() - p.y - 1][p.x] = c;
+  float n = 1 - m;
+  return Point(n * p1.x + m * p2.x, n * p1.y + m * p2.y);
 }
 
-
-void setQuartPixel(Point p, Point center, Image& im, char c)
+float distance(Point p1, Point p2)
 {
-  setPixel(Point(p.x + center.x, p.y + center.y), im, c);
-  setPixel(Point(p.x + center.x, -p.y + center.y), im, c);
-  setPixel(Point(-p.x + center.x, -p.y + center.y), im, c);
-  setPixel(Point(-p.x + center.x, p.y + center.y), im, c);
-}
-
-void setOctPixel(Point p, Point center, Image& im, char c)
-{
-  setQuartPixel(p, center, im, c);
-  setQuartPixel(Point(p.y, p.x), center, im, c);
-}
-
-void outImage(const Image& im)
-{
-  for(const auto& line : im)
-    {
-      for(char pix : line)
-	std::cout << pix << " ";
-      std::cout << std::endl;
-    }
-}
-
-void clearImage(Image& im, char c)
-{
-  for(auto& line : im)
-    for(char& ele : line)
-      ele = c;
+  return sqrt(pow(p1.x - p2.x, 2) + pow(p1.y - p2.y, 2));
 }

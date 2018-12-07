@@ -1,55 +1,53 @@
 #include <iostream>
-#include <utility>
 #include <algorithm>
 #include <unistd.h>
+#include <GL/glut.h>
+#include <cmath>
 #include "image_utility.h"
 #include "primitives.h"
 
-Image canvas;
+
+const int width = 640;
+const int height = 480;
+
+Point p1(0, 0);
+Point p2(200, 0);
+Point mid = segPoint(p1, p2, 0.5);;
+Point p3(mid.x, round(distance(p1, mid) * sqrt(3)));
+Point center(mid.x, p3.y / 3);
+
+void init()
+{
+  glClearColor(0.0, 0.0, 0.0, 0.0);
+  glMatrixMode(GL_PROJECTION);
+  gluOrtho2D(0.0, width, 0.0, height);
+}
+
+void display()
+{
+  glColor3f(1, 1, 1);
+  
+  drawLine(p1, p2);
+  drawLine(p2, p3);
+  drawLine(p3, p1);
+  drawLine(p3, mid);
+  drawCircle(center, center.y);
+  
+  glFlush();
+}
 
 int main(int argc, char** argv)
 {
-  //Initialize image
-  int w = 33;
-  int h = 33;
-  canvas.resize(h, std::vector<char>(w, ' '));
+  glutInit(&argc, argv);  
+  glutInitWindowSize(width, height);
+  glutInitWindowPosition(100, 100);
+  glutInitDisplayMode(GLUT_RGB);  
+  glutCreateWindow("Graphic primitives");
 
-  Point p0(16, 16);
-  Point pArr[16] =
-    {
-      {30, 15},
-      {30, 20},
-      {30, 30},
-      {20, 30},
-      {15, 30},
-      {10, 30},
-      {0, 30},
-      {0, 20},
-      {0, 15},
-      {0, 10},
-      {0, 0},
-      {10, 0},
-      {15, 0},
-      {20, 0},
-      {30, 0},
-      {30, 10}
-    };
-  
-  for(int idx = 0; ; ++idx)
-    {
-      idx %= 16;
-      
-      usleep(500000);
-      system("clear");
-      
-      drawLine(p0, pArr[idx], canvas, '*');
-      drawCircle(p0, idx, canvas, '#');
-      drawElipse(p0, idx, idx / 2, canvas, '&');
-      
-      outImage(canvas);
-      clearImage(canvas, ' ');
-    }
-  
+  init();
+  glutDisplayFunc(display);
+  glutMainLoop();
+    
   return 0;
 }
 

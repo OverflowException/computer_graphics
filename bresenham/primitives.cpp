@@ -3,6 +3,7 @@
 #include <functional>
 #include <cmath>
 #include <iostream>
+#include <GL/glut.h>
 
 //This is a table dealing with Flipping transformations
 std::function<Point(Point)> lineTrans[4] =
@@ -13,7 +14,7 @@ std::function<Point(Point)> lineTrans[4] =
     [](Point p){return Point(p.y, -p.x);}
   };
 
-void drawLine(Point p1, Point p2, Image& im, char c)
+void drawLine(Point p1, Point p2)
 {  
   //Make sure p1 is on the left, p2 is on the right
   if(p1.x > p2.x)
@@ -53,10 +54,11 @@ void drawLine(Point p1, Point p2, Image& im, char c)
   beta = 2 * dy - 2 * dx;
   criterion = 2 * dy - dx;
 
-  //Draw each pixel  
+  //Draw each pixel
+  glBegin(GL_POINTS);
   for(int x = p1.x, y = p1.y; x <= p2.x; ++x)
     {
-      setPixel(lineTrans[transIdx](Point(x, y)), im, c);
+      setPixel(lineTrans[transIdx](Point(x, y)));
       
       //Nearer to upper
       if(criterion > 0)
@@ -68,17 +70,17 @@ void drawLine(Point p1, Point p2, Image& im, char c)
       else
 	criterion += alpha;
     }
-  //One last point
-  //setPixel(lineTrans[transIdx](p2), im, c);
+  glEnd();
 }
 
-void drawCircle(Point center, int r, Image& im, char c)
+void drawCircle(Point center, int r)
 {
   int p = 1 - r;
-  
+
+  glBegin(GL_POINTS);
   for(int x = 0, y = r; x <= y; ++x)
     {
-      setOctPixel(Point(x, y), center, im, c);
+      setOctPixel(Point(x, y), center);
 
       if(p < 0)
 	p += 2 * x + 3;
@@ -88,10 +90,11 @@ void drawCircle(Point center, int r, Image& im, char c)
 	  --y;
 	}
     }
+  glEnd();
 }
 
 
-void drawElipse(Point center, int rx, int ry, Image& im, char c)
+void drawElipse(Point center, int rx, int ry)
 {
   //Some frequently used constants
   int rx2 = rx * rx;
@@ -109,9 +112,11 @@ void drawElipse(Point center, int rx, int ry, Image& im, char c)
   int x = 0;
   int y = ry;
   p = round(ry2 - rx2 * ry + 0.25 * rx2);
+
+  glBegin(GL_POINTS);
   for(; dx < dy; ++x)
     {
-      setQuartPixel(Point(x, y), center, im, c);
+      setQuartPixel(Point(x, y), center);
       
       if(p < 0)
 	p += dx + threery2;
@@ -124,4 +129,5 @@ void drawElipse(Point center, int rx, int ry, Image& im, char c)
 
       dx += twory2;
     }
+  glEnd();
 }
