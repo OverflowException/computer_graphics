@@ -131,3 +131,14 @@ void drawElipse(Point center, int rx, int ry)
     }
   glEnd();
 }
+
+void drawEntity(const Entity& ent)
+{
+  glColor3fv(ent.color);
+  
+  for(const Entity::Edge& e : ent.edges)
+    drawLine(ent.verts[e.first], ent.verts[e.second]);
+
+  for(const Entity::Circle& c : ent.circles)
+    drawCircle(ent.verts[c.first], c.second);
+}

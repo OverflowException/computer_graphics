@@ -1,4 +1,5 @@
 #include "image_utility.h"
+#include "primitives.h"
 #include <iostream>
 #include <GL/glut.h>
 #include <cmath>

@@ -1,15 +1,8 @@
 #ifndef _IMAGE_UTILITY_H
 #define _IMAGE_UTILITY_H
 
-#include <vector>
 #include <GL/glut.h>
-
-struct Point
-{
-  int x;
-  int y;
-Point(int x = 0, int y = 0) : x(x), y(y){};
-};
+#include "object_utility.h"
 
 inline void setPixel(Point p)
 {
