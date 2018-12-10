@@ -13,6 +13,7 @@ const int height = 480;
 
 Entity emulet;
 
+//Constructs something like the Deathly Hallows in Harry Potter
 void construct(Entity& ent)
 {  
   Point p1(0, 0);
@@ -39,30 +40,29 @@ void construct(Entity& ent)
 void init()
 {
   glClearColor(0.2, 0.2, 0.2, 0.0);
-  glClear(GL_COLOR_BUFFER_BIT);
   glMatrixMode(GL_PROJECTION);
   gluOrtho2D(0.0, width, 0.0, height);
 }
 
 void display()
 {
-  drawEntity(emulet);
-  // drawLine(p1, p2);
-  // drawLine(p2, p3);
-  // drawLine(p3, p1);
-  // drawLine(p3, mid);
-  // drawCircle(center, center.y);
+  TransMat2d mtrans;
+  translate2d(mtrans, width / 2 - emulet.verts[4].x, height / 2 - emulet.verts[4].y);
+  transformEntity2d(mtrans, emulet);
   
-  glFlush();
+  rotate2d(mtrans, emulet.verts[4], 10);
+  while(true)
+    {
+      glClear(GL_COLOR_BUFFER_BIT);
+      transformEntity2d(mtrans, emulet);
+      drawEntity(emulet);
+      glFlush();
+      usleep(100000);
+    }
 }
 
 int main(int argc, char** argv)
-{
-
-  TransMat2d trans;
-  setIdentity(trans);
-  showMat(trans);
-  
+{  
   glutInit(&argc, argv);  
   glutInitWindowSize(width, height);
   glutInitWindowPosition(100, 100);
@@ -70,6 +70,7 @@ int main(int argc, char** argv)
   glutCreateWindow("Graphic primitives");
 
   construct(emulet);
+  
   init();
   glutDisplayFunc(display);
   glutMainLoop();

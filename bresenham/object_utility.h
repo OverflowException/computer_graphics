@@ -11,6 +11,7 @@ struct Point
 Point(int x = 0, int y = 0) : x(x), y(y){};
 };
 
+//This representation of Entity cannot deal with circle scaling
 struct Entity
 {
   typedef size_t VertIdx;

@@ -1,0 +1,8 @@
+1.Draw complete elipse, elipse with different orientations
+
+2.Change the precision of Point from int to float for better precision when applying tranformation
+  Convert to int right before putting on screen
+  
+3.Reconstruct Entity so that it can have
+	      1) named verices(std::map)
+	      2) points can be deducted from constraints.
