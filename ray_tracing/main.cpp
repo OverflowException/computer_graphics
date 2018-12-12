@@ -40,6 +40,27 @@ void display()
   glFlush();
 }
 
+void keyPressed(unsigned char key, int x, int y)
+{
+  switch(key)
+    {
+    case 'w':
+      centery += 10;
+      break;
+    case 'a':
+      centerx -= 10;
+      break;
+    case 's':
+      centery -= 10;
+      break;
+    case 'd':
+      centerx += 10;
+      break;
+    }  
+  
+  glutPostRedisplay();
+}
+
 void initDisplay()
 {
   glClearColor(0.3, 0.3, 0.3, 0.0);
@@ -47,7 +68,6 @@ void initDisplay()
   glMatrixMode(GL_PROJECTION);
 
   gluOrtho2D(0.0, width, 0.0, height);
-  //glColor3f(0, 1, 0);  
 }
 
 int main(int argc, char** argv)
@@ -60,5 +80,6 @@ int main(int argc, char** argv)
 
   initDisplay();
   glutDisplayFunc(display);
+  glutKeyboardFunc(keyPressed);
   glutMainLoop();
 }
