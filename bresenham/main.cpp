@@ -3,24 +3,24 @@
 #include <unistd.h>
 #include <GL/glut.h>
 #include <cmath>
-#include "image_utility.h"
+#include "display_utility.h"
 #include "primitives.h"
 #include "transforms.h"
-
+#include "arithmetics.h"
 
 const int width = 640;
 const int height = 480;
 
-Entity emulet;
+Entity<double> emulet;
 
 //Constructs something like the Deathly Hallows in Harry Potter
-void construct(Entity& ent)
+void construct(Entity<double>& ent)
 {  
-  Point p1(0, 0);
-  Point p2(200, 0);
-  Point mid = segPoint(p1, p2, 0.5);;
-  Point p3(mid.x, round(distance(p1, mid) * sqrt(3)));
-  Point center(mid.x, p3.y / 3);
+  Pointd p1(0, 0);
+  Pointd p2(200, 0);
+  Pointd mid = segPoint(p1, p2, 0.5);;
+  Pointd p3(mid.x, distance(p1, mid) * sqrt(3));
+  Pointd center(mid.x, p3.y / 3);
 
   ent.addVert(p1);
   ent.addVert(mid);
@@ -60,6 +60,12 @@ void display()
       usleep(100000);
     }
 }
+
+// void display()
+// {
+//   drawLine(Pointd(0.15, 0.33), Pointd(12.33, 5.78));
+//   glFlush();
+// }
 
 int main(int argc, char** argv)
 {  

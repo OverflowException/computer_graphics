@@ -3,7 +3,7 @@
 
 #include "object_utility.h"
 
-typedef float TransMat2d [3][3];
+typedef double TransMat2d [3][3];
 
 template<typename M, typename D>
 void matCopy(const M& src, M& dst, D r, D c)
@@ -32,12 +32,12 @@ void matMul(const M& m1, const M& m2, M& mr, D r1, D c2, D common)
 
 void setIdentity2d(TransMat2d);
 
-void rotate2d(TransMat2d, Point center, float angle);
-void scale2d(TransMat2d, Point pvt, float sx, float sy);
-void translate2d(TransMat2d, float tx, float ty);
+void rotate2d(TransMat2d, Pointd center, double angle);
+void scale2d(TransMat2d, Pointf pvt, double sx, double sy);
+void translate2d(TransMat2d, double tx, double ty);
 
 void showMat3x3(TransMat2d);
 
-void transformEntity2d(const TransMat2d&, Entity&);
+void transformEntity2d(const TransMat2d& mat, Entity<double>& ent);
 
 #endif

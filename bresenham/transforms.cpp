@@ -9,10 +9,10 @@ void setIdentity2d(TransMat2d mat)
       mat[row][col] = (row == col);
 }
 
-void scale2d(TransMat2d mat, Point center, float sx, float sy)
+void scale2d(TransMat2d mat, Pointd center, double sx, double sy)
 {
-  int xc = center.x;
-  int yc = center.y;
+  double xc = center.x;
+  double yc = center.y;
   
   setIdentity2d(mat);
   mat[0][0] = sx;
@@ -21,14 +21,14 @@ void scale2d(TransMat2d mat, Point center, float sx, float sy)
   mat[1][2] = (1 - sy) * yc;
 }
 
-void rotate2d(TransMat2d mat, Point center, float angle)
+void rotate2d(TransMat2d mat, Pointd center, double angle)
 {
-  int xc = center.x;
-  int yc = center.y;
+  double xc = center.x;
+  double yc = center.y;
 
-  float rad = angle * M_PI / 180;
-  float sine = sin(rad);
-  float cosine = cos(rad);
+  double rad = angle * M_PI / 180;
+  double sine = sin(rad);
+  double cosine = cos(rad);
 
   //Row 0
   mat[0][0] = cosine;
@@ -43,7 +43,7 @@ void rotate2d(TransMat2d mat, Point center, float angle)
   mat[2][2] = 1;  
 }
 
-void translate2d(TransMat2d mat, float tx, float ty)
+void translate2d(TransMat2d mat, double tx, double ty)
 {
   setIdentity2d(mat);
   mat[0][2] = tx;
@@ -60,17 +60,17 @@ void showMat3x3(TransMat2d mat)
     }
 }
 
-//This transoform function cannot deal with scaling of circle
-void transformEntity2d(const TransMat2d& mat, Entity& ent)
+
+//This transform function cannot deal with scaling of circle
+void transformEntity2d(const TransMat2d& mat, Entity<double>& ent)
 {
-  float xf, yf;
-  for(Point& p : ent.verts)
+  double x, y;
+  for(Pointd& p : ent.verts)
     {
-      //To ensure floating point property
-      xf = p.x;
-      yf = p.y;
-      p.x = mat[0][0] * xf + mat[0][1] * yf + mat[0][2];
-      p.y = mat[1][0] * xf + mat[1][1] * yf + mat[1][2];
+      x = p.x;
+      y = p.y;
+      p.x = mat[0][0] * x + mat[0][1] * y + mat[0][2];
+      p.y = mat[1][0] * x + mat[1][1] * y + mat[1][2];
     }
 }
 
