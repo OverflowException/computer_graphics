@@ -51,12 +51,10 @@ void initDisplay()
 
 void regHexagon()
 {
-  //glMatrixMode(GL_PROJECTION);
-  //glLoadIdentity();
-  gluOrtho2D(0.0, (GLdouble)width, 0.0, (GLdouble)height);
-  //glClear(GL_COLOR_BUFFER_BIT);
+  //gluOrtho2D(0.0, (GLdouble)width, 0.0, (GLdouble)height);
   
   glCallList(regHex);
+  
   glFlush();
 }
 
@@ -64,10 +62,7 @@ void reshape(int newWidth, int newHeight)
 {
   glMatrixMode(GL_PROJECTION);
   glLoadIdentity();
-  width = newHeight;
-  height = newHeight;
-  //Ortho here does not seem to work
-  //gluOrtho2D(0.0, (GLdouble)newWidth, 0.0, (GLdouble)newHeight);  
+  gluOrtho2D(0.0, (GLdouble)newWidth, 0.0, (GLdouble)newHeight);
   
   glClear(GL_COLOR_BUFFER_BIT);
 }
@@ -82,7 +77,7 @@ int main(int argc, char** argv)
 
   initDisplay();
   glutDisplayFunc(regHexagon);
-  //glutReshapeFunc(reshape);
+  glutReshapeFunc(reshape);
   glutMainLoop();
 }
 
