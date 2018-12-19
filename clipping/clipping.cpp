@@ -6,10 +6,10 @@
 int width = 640;
 int height = 480;
 
-int cxmin = 100;
-int cxmax = 600;
-int cymin = 100;
-int cymax = 400;
+int cxmin = 270;
+int cxmax = 370;
+int cymin = 190;
+int cymax = 290;
 
 struct Point
 {
@@ -59,8 +59,12 @@ struct Rect
 void initDisplay();
 void display();
 void display_aux();
+
 bool lineClipCoSu(Point&, Point&, const Rect&);
 void lineClipCoSu_aux(Point&, GLubyte, GLdouble, GLdouble, const Rect&);
+
+bool lineClipLiBa(Point&, Point&, const Rect&);
+bool lineClipLiBa_aux(GLdouble, GLdouble, GLdouble&, GLdouble&);
 
 int main(int argc, char** argv)
 {
@@ -69,7 +73,7 @@ int main(int argc, char** argv)
   glutInitWindowPosition(200, 200);
   glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
   glutCreateWindow("Unamed");
-
+  
   initDisplay();
   glutDisplayFunc(display);
   //glutKeyboardFunc(/*Callback*/);
@@ -120,7 +124,8 @@ void display()
 
       //Get a clipped version of this line
       //If there is still some segment left in clipping boundary
-      if(lineClipCoSu(p1, p2, border))
+      //if(lineClipCoSu(p1, p2, border))
+      if(lineClipLiBa(p1, p2, border))
 	{
 	  glColor3f(1, 0, 0);
 	  glVertex2d(p1.x, p1.y);
@@ -156,7 +161,8 @@ void display_aux()
   glVertex2d(p2.x, p2.y);
   glEnd();
 
-  lineClipCoSu(p1, p2, border);  
+  //lineClipCoSu(p1, p2, border);
+  lineClipLiBa(p1, p2, border);  
   glBegin(GL_LINES);
   glColor3f(1, 0, 0);
   glVertex2d(p1.x, p1.y);
@@ -189,6 +195,8 @@ inline GLubyte encode(Point p, const Rect& rect)
   return result;
 }
 
+//This function can only return false when direct reject happens.
+//Cannot return false at all rejects
 bool lineClipCoSu(Point& p1, Point& p2, const Rect& rect)
 {
   GLubyte code1 = encode(p1, rect);
@@ -262,4 +270,60 @@ void lineClipCoSu_aux(Point& p, GLubyte code, GLdouble dx, GLdouble dy, const Re
 	  p.x = rect.r;
 	}
     }
+}
+
+
+bool lineClipLiBa(Point& p1, Point& p2, const Rect& rect)
+{  
+  GLdouble dx = p2.x - p1.x;
+  GLdouble dy = p2.y - p1.y;
+  
+  GLdouble u1 = 0.0, u2 = 1.0;
+
+  if(lineClipLiBa_aux(-dx, p1.x - rect.l, u1, u2) &&
+     lineClipLiBa_aux(dx, rect.r - p1.x, u1, u2) &&
+     lineClipLiBa_aux(-dy, p1.y - rect.d, u1, u2) &&
+     lineClipLiBa_aux(dy, rect.u - p1.y, u1, u2))
+    {
+      //Update p2 first. Because p2 is calculated based on original value of p1.
+      if(u2 != 1.0)
+	p2 = Point(p1.x + u2 * dx, p1.y + u2 * dy);
+      if(u1 != 0.0)
+	p1 = Point(p1.x + u1 * dx, p1.y + u1 * dy);
+      return true;
+    }
+
+  return false;
+}
+
+//Updates u1 or u2, check validity at the same time
+bool lineClipLiBa_aux(GLdouble p, GLdouble q, GLdouble& u1, GLdouble& u2)
+{
+  GLdouble r = 0;
+
+  //Prallel to clipping edge
+  if(p == 0)
+    if(q < 0)
+      return false;
+    else
+      return true;
+
+  r = q / p;
+  //Update u1
+  if(p < 0)
+    {
+      if(r > u1)
+	u1 = r;
+    }
+  //Update u2
+  else if(p > 0)
+    {
+      if(r < u2)
+	u2 = r;
+    }
+
+  if(u1 >= u2)
+    return false;
+  else
+    return true;
 }
