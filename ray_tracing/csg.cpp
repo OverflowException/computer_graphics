@@ -16,11 +16,32 @@ int centery = height / 2;
 #define MAX_DISTANCE 500
 #define EPSILON 1e-6f
 
+struct Result
+{
+  float sd;
+  float emission;
+};
+
+
 //Calculate Singned Distance Field of a circle
 inline float circleSDF(float x, float y, float cx, float cy, float r)
 {
   return sqrt(pow(cx - x, 2) + pow(cy - y, 2)) - r;
 }
+
+Result unionOp(Result r1, Result r2)
+{
+  return r1.sd < r2.sd ? r1 : r2;
+}
+
+Result scene(float x, float y)
+{
+  Result r1 = {circleSDF(x, y, 250, 150, 40), 2.0};
+  Result r2 = {circleSDF(x, y, 250, 250, 40), 4.0};
+  Result r3 = {circleSDF(x, y, 290, 250, 20), 0.5};
+  
+  return unionOp(unionOp(r1, r2), r3);
+}   
 
 //Ray marching method of ray tracing
 float trace(float ox, float oy, float dx, float dy)
@@ -28,10 +49,10 @@ float trace(float ox, float oy, float dx, float dy)
   float t;
   for(int i = 0; i < MAX_STEP && t < MAX_DISTANCE; ++i)
     {
-      float sd = circleSDF(ox + dx * t, oy + dy * t, centerx, centery, radius);
-      if(sd < EPSILON)
-	return 2.0;
-      t += sd;
+      Result r = scene(ox + dx * t, oy + dy * t);
+      if(r.sd < EPSILON)
+	return r.emission;
+      t += r.sd;
     }
 
   return 0;
@@ -52,18 +73,21 @@ float sample(float x, float y)
 
 void display()
 {
-  glBegin(GL_POINTS);
   int x, y;
   float illumi;
-  for(x = 0; x < width; ++x)
-    for(y = 0; y < height; ++y)
-      {
-	illumi = sample(x, y);
-	glColor3f(illumi, illumi, illumi);
-	glVertex2i(x, y);
-      }
-  glEnd();
   
+  glBegin(GL_POINTS);
+  for(x = 0; x < width; ++x)
+    {
+      for(y = 0; y < height; ++y)
+	{
+	  illumi = sample(x, y);
+	  glColor3f(illumi, illumi, illumi);
+	  
+	  glVertex2i(x, y);
+	}
+    }
+  glEnd();
   glFlush();
 }
 
