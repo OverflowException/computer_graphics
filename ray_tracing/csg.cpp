@@ -29,9 +29,23 @@ inline float circleSDF(float x, float y, float cx, float cy, float r)
   return sqrt(pow(cx - x, 2) + pow(cy - y, 2)) - r;
 }
 
-Result unionOp(Result r1, Result r2)
+Result unionOp(Result a, Result b)
 {
-  return r1.sd < r2.sd ? r1 : r2;
+  return a.sd < b.sd ? a : b;
+}
+
+Result intersectOp(Result a, Result b)
+{
+  Result r = a.sd > b.sd ? b : a;
+  r.sd = a.sd > b.sd ? a.sd : b.sd;
+  return r;
+}
+
+Result subtractOp(Result a, Result b)
+{
+  Result r = a;
+  r.sd = (a.sd > -b.sd) ? a.sd : -b.sd;
+  return r;
 }
 
 Result scene(float x, float y)
@@ -40,7 +54,7 @@ Result scene(float x, float y)
   Result r2 = {circleSDF(x, y, 250, 250, 40), 4.0};
   Result r3 = {circleSDF(x, y, 290, 250, 20), 0.5};
   
-  return unionOp(unionOp(r1, r2), r3);
+  return unionOp(intersectOp(r2, r3), r1);
 }   
 
 //Ray marching method of ray tracing
