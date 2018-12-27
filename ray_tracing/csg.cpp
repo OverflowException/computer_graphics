@@ -54,7 +54,7 @@ Result scene(float x, float y)
   Result r2 = {circleSDF(x, y, 250, 250, 40), 4.0};
   Result r3 = {circleSDF(x, y, 290, 250, 20), 0.5};
   
-  return unionOp(intersectOp(r2, r3), r1);
+  return unionOp(subtractOp(r2, r3), r1);
 }   
 
 //Ray marching method of ray tracing
