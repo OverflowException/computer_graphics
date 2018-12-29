@@ -1,15 +1,16 @@
 #include <GL/glut.h>
 #include "perlin.cpp"
+#include <algorithm>
 
+int width = 800;
+int height = 800;
 
-int width = 768;
-int height = 768;
-
+//A decimal LUT to reduce floating point operations
+vector<float> dec_lut;
 
 void initDisplay();
 void display();
-
-
+void genDecLUT(float n, vector<float>& lut);
 
 int main(int argc, char** argv)
 {
@@ -19,6 +20,7 @@ int main(int argc, char** argv)
   glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
   glutCreateWindow("Unamed");
 
+  genDecLUT(width / gw, dec_lut);
   initDisplay();
   glutDisplayFunc(display);
   //glutKeyboardFunc(/*Callback*/);
@@ -36,7 +38,6 @@ void initDisplay()
   gluOrtho2D(0.0, (GLdouble)gw, 0.0, (GLdouble)gh);
 }
 
-array<float, 10> dec_map = {0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9};
 
 void display()
 {
@@ -48,18 +49,31 @@ void display()
   float avg;
   GLubyte color;
 
-  for(gridx = 0; gridx < gw - 1; ++gridx)
-    for(gridy = 0; gridy < gh - 1; ++gridy)
-      for(x = 0; x < 10; ++x)
-	for(y = 0; y < 10; ++y)
+  for(gridx = 0; gridx < gw; ++gridx)
+    for(gridy = 0; gridy < gh; ++gridy)
+      for(x = 0; x < dec_lut.size(); ++x)
+	for(y = 0; y < dec_lut.size(); ++y)
 	  {
-	    avg = perlin(gridx + dec_map[x], gridy + dec_map[y]);	    
+	    avg = perlin(gridx + dec_lut[x], gridy + dec_lut[y]);	    
 	    color = (0.5 + avg) / 1 * 256;
 	    glColor3ub(color, color, color);
-	    glVertex2d(gridx + dec_map[x], gridy + dec_map[y]);
+	    glVertex2d(gridx + dec_lut[x], gridy + dec_lut[y]);
 	  }
   
   glEnd();
   
   glFlush();
+}
+
+void genDecLUT(float n, vector<float>& lut)
+{
+  lut.resize(n);
+  float value = 0;
+  float offset = 1 / n;
+
+  for_each(lut.begin(), lut.end(), [&](float& a)
+	   {
+	     a = value;
+	     value += offset;
+	   });
 }
