@@ -5,8 +5,13 @@
 int width = 640;
 int height = 480;
 
+int currCtIdx = 0;
+ControlPoints ctps;
+
 void initDisplay();
+void initControlPoints();
 void display();
+void keyPressed(unsigned char key, int x, int y);
 void markCross(Point c);
 void markSquare(Point c);
 
@@ -20,14 +25,23 @@ int main(int argc, char** argv)
   glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
   glutCreateWindow("Bezier");
 
+  initControlPoints();
   initDisplay();
   glutDisplayFunc(display);
-  //glutKeyboardFunc(/*Callback*/);
+  glutKeyboardFunc(keyPressed);
   glutMainLoop();
 
   return 0;
 }
-  
+
+void initControlPoints()
+{
+  ctps.data[0] = {50, 240};
+  ctps.data[1] = {200, 450};
+  ctps.data[2] = {400, 50};
+  ctps.data[3] = {600, 260};
+}
+
 void initDisplay()
 {
   glClearColor(0.3, 0.3, 0.3, 0.0);
@@ -37,16 +51,12 @@ void initDisplay()
   gluOrtho2D(0.0, (GLdouble)width, 0.0, (GLdouble)height);
 }
 
-
 void display()
 {
-  ControlPoints ctps;
-  ctps.data[0] = {50, 240};
-  ctps.data[1] = {200, 450};
-  ctps.data[2] = {400, 50};
-  ctps.data[3] = {600, 260};
   CurvePoints cvps = genBezier(ctps, 24);
-  
+
+  //Draw the curve as line segments
+  glClear(GL_COLOR_BUFFER_BIT);
   glColor3f(1, 1, 1);
   glBegin(GL_LINE_STRIP);
   for(int idx = 0; idx < cvps.num; ++idx)
@@ -68,6 +78,52 @@ void display()
     }
   
   glFlush();
+}
+
+void keyPressed(unsigned char key, int x, int y)
+{
+  std::cout << "Pressed key " << key;
+  std::cout << " Mouse at (" << x << ", " << y << ")" << std::endl;
+
+  switch(key)
+    {
+    case 'q':
+      std::cout << "Exit" << std::endl;
+      exit(0);
+      break;
+      
+    case '0':
+      currCtIdx = 0;
+      break;
+      
+    case '1':
+      currCtIdx = 1;
+      break;
+      
+    case '2':
+      currCtIdx = 2;
+      break;
+      
+    case '3':
+      currCtIdx = 3;
+      break;
+
+    case 'a':
+      ctps.data[currCtIdx].x -= 5;
+      break;
+    case 'w':
+      ctps.data[currCtIdx].y += 5;
+      break;
+    case 's':
+      ctps.data[currCtIdx].y -= 5;
+      break;
+    case 'd':
+      ctps.data[currCtIdx].x += 5;
+      break;
+    }
+  
+  //Post a redisplay message to message queue
+  glutPostRedisplay();
 }
 
 void markCross(Point c)
