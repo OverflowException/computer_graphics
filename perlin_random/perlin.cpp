@@ -25,12 +25,9 @@ void genGrad2D()
 
 // Function to linearly interpolate between a0 and a1
 // Weight w should be in the range [0.0, 1.0]
-float lerp(float a0, float a1, float w)
+inline float lerp(float a, float b, float w)
 {
-  return (1.0 - w)*a0 + w*a1;
-  
-  // as an alternative, this slightly faster equivalent formula can be used:
-  // return a0 + w*(a1 - a0);
+  return a + w * (b - a);
 }
 
 // Computes the dot product of the distance and gradient vectors.
@@ -59,14 +56,14 @@ float perlin(float x, float y)
   float sy = y - (float)y0;
 
   // Interpolate between grid point gradients
-  float n0, n1, ix0, ix1, value;
+  float n0, n1, avgx1, avgx2, avg;
   n0 = dotGridGradient(x0, y0, x, y);
   n1 = dotGridGradient(x1, y0, x, y);
-  ix0 = lerp(n0, n1, sx);
+  avgx1 = lerp(n0, n1, sx);
   n0 = dotGridGradient(x0, y1, x, y);
   n1 = dotGridGradient(x1, y1, x, y);
-  ix1 = lerp(n0, n1, sx);
-  value = lerp(ix0, ix1, sy);
+  avgx2 = lerp(n0, n1, sx);
+  avg = lerp(avgx1, avgx2, sy);
 
-  return value;
+  return avg;
 }
