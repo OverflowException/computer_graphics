@@ -6,11 +6,11 @@
 
 using namespace std;
 
-//Terrain ranging from, [0, gw - 1], [0, gh - 1].
-const int gw = 128;
-const int gh = 128;
+const int gw = 32;
+const int gh = 32;
 
-vector<vector<array<double, 2>>> Gradient(gh, vector<array<double, 2>>(gw, array<double, 2>()));
+//Width and height +1 to make Gradient cover [0, gw], [0, gh]
+vector<vector<array<double, 2>>> Gradient(gh + 1, vector<array<double, 2>>(gw + 1, array<double, 2>()));
 
 void genGrad2D()
 {
