@@ -5,13 +5,16 @@
 int width = 640;
 int height = 480;
 
-int currCtIdx = 0;
 ControlPoints ctps;
+
+int currCtIdx = 0;
+bool mouseDown = false;
 
 void initDisplay();
 void initControlPoints();
 void display();
-void keyPressed(unsigned char key, int x, int y);
+void mouseHandler(int button, int state, int x, int y);
+void motionHandler(int x, int y);
 void markCross(Point c);
 void markSquare(Point c);
 
@@ -28,7 +31,9 @@ int main(int argc, char** argv)
   initControlPoints();
   initDisplay();
   glutDisplayFunc(display);
-  glutKeyboardFunc(keyPressed);
+  glutMotionFunc(motionHandler);
+  //glutKeyboardFunc(keyPressed);
+  glutMouseFunc(mouseHandler);
   glutMainLoop();
 
   return 0;
@@ -80,49 +85,39 @@ void display()
   glFlush();
 }
 
-void keyPressed(unsigned char key, int x, int y)
+void mouseHandler(int button, int state, int x, int y)
 {
-  std::cout << "Pressed key " << key;
-  std::cout << " Mouse at (" << x << ", " << y << ")" << std::endl;
-
-  switch(key)
+  //Mouse y coordinate is opposite to OpenGL coordinate
+  y = height - y;
+  //Left button down
+  if(button == 0 && state == 0)
     {
-    case 'q':
-      std::cout << "Exit" << std::endl;
-      exit(0);
-      break;
-      
-    case '0':
-      currCtIdx = 0;
-      break;
-      
-    case '1':
-      currCtIdx = 1;
-      break;
-      
-    case '2':
-      currCtIdx = 2;
-      break;
-      
-    case '3':
-      currCtIdx = 3;
-      break;
-
-    case 'a':
-      ctps.data[currCtIdx].x -= 5;
-      break;
-    case 'w':
-      ctps.data[currCtIdx].y += 5;
-      break;
-    case 's':
-      ctps.data[currCtIdx].y -= 5;
-      break;
-    case 'd':
-      ctps.data[currCtIdx].x += 5;
-      break;
+      for(int idx = 0; idx < 4; ++idx)
+	if(x >= ctps.data[idx].x - 5 &&
+	   x <= ctps.data[idx].x + 5 &&
+	   y >= ctps.data[idx].y - 5 &&
+	   y <= ctps.data[idx].y + 5)
+	  {
+	    mouseDown = true;
+	    currCtIdx = idx;
+	  }
     }
-  
-  //Post a redisplay message to message queue
+  //Right button
+  else if(button == 2)
+    exit(0);
+  else
+    mouseDown = false;
+}
+
+void motionHandler(int x, int y)
+{
+  //Mouse y coordinate is opposite to OpenGL coordinate
+  y = height - y;
+  if(mouseDown)
+    {
+      ctps.data[currCtIdx].x = x;
+      ctps.data[currCtIdx].y = y;
+    }
   glutPostRedisplay();
 }
 
