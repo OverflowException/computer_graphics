@@ -5,7 +5,10 @@
 int width = 640;
 int height = 480;
 
-ControlPoints ctps;
+CurveCtrlPts ctps =
+  {
+    {{50, 240}, {200, 450}, {400, 50}, {600, 260}}
+  };
 
 int currCtIdx = 0;
 bool mouseDown = false;
@@ -28,7 +31,6 @@ int main(int argc, char** argv)
   glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
   glutCreateWindow("Bezier");
 
-  initControlPoints();
   initDisplay();
   glutDisplayFunc(display);
   glutMotionFunc(motionHandler);
@@ -37,14 +39,6 @@ int main(int argc, char** argv)
   glutMainLoop();
 
   return 0;
-}
-
-void initControlPoints()
-{
-  ctps.data[0] = {50, 240};
-  ctps.data[1] = {200, 450};
-  ctps.data[2] = {400, 50};
-  ctps.data[3] = {600, 260};
 }
 
 void initDisplay()
@@ -58,7 +52,7 @@ void initDisplay()
 
 void display()
 {
-  CurvePoints cvps = genBezier(ctps, 24);
+  TessCurve cvps = genBezierCurve(ctps, 24);
 
   //Draw the curve as line segments
   glClear(GL_COLOR_BUFFER_BIT);
