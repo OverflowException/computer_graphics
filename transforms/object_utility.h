@@ -21,7 +21,8 @@ struct Point_
   
   coord_type x;
   coord_type y;
-  Point_(T x = 0, T y = 0) : x(x), y(y){};
+  coord_type z;
+  Point_(T x = 0, T y = 0, T z = 0) : x(x), y(y), z(z){};
   
   template<typename Tt>
   Point_(const Point_<Tt>& p)
@@ -33,12 +34,14 @@ struct Point_
   {
     this->x = round(double(p.x));
     this->y = round(double(p.y));
+    this->z = round(double(p.z));
   }
 
   void _Point_(const Pointd& p, int)
   {
     this->x = round(p.x);
     this->y = round(p.y);
+    this->z = round(p.z);
   }
 
   template<typename Tt, typename Tn>
@@ -46,6 +49,7 @@ struct Point_
   {
     this->x = p.x;
     this->y = p.y;
+    this->z = p.z;
   }
   
 };

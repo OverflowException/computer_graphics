@@ -4,9 +4,10 @@
 #include "object_utility.h"
 
 typedef double TransMat2d [3][3];
+typedef double TransMat3d [4][4];
 
 template<typename M, typename D>
-void matCopy(const M& src, M& dst, D r, D c)
+void matCopy(M src, M dst, D r, D c)
 {
   for(D row = 0; row < r; ++row)
     for(D col = 0; col < c; ++col)
@@ -14,7 +15,7 @@ void matCopy(const M& src, M& dst, D r, D c)
 }
 
 template<typename M, typename D>
-void matMul(const M& m1, const M& m2, M& mr, D r1, D c2, D common)
+void matMul(M m1, M m2, M mr, D r1, D c2, D common)
 {
   M mtmp;
   for(D row = 0; row < r1; ++row)
@@ -36,8 +37,11 @@ void rotate2d(TransMat2d, Pointd center, double angle);
 void scale2d(TransMat2d, Pointf pvt, double sx, double sy);
 void translate2d(TransMat2d, double tx, double ty);
 
+bool rotateAxis3d(TransMat3d mat, int axis, double angle);
+void rotate3d(TransMat3d mat, Pointd axisp1, Pointd axisp2, double angle);
+
 void showMat3x3(TransMat2d);
 
-void transformEntity2d(const TransMat2d& mat, Entity<double>& ent);
+void transformEntity2d(TransMat2d mat, Entity<double>& ent);
 
 #endif
