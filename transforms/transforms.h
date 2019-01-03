@@ -1,7 +1,7 @@
 #ifndef _TRANSFORMS_H
 #define _TRANSFORMS_H
 
-#include "object_utility.h"
+#include "point_utility.h"
 
 typedef double TransMat2d [3][3];
 typedef double TransMat3d [4][4];
@@ -32,16 +32,16 @@ void matMul(M m1, M m2, M mr, D r1, D c2, D common)
 }
 
 void setIdentity2d(TransMat2d);
-
+void setIdentity3d(TransMat3d);
 void rotate2d(TransMat2d, Pointd center, double angle);
-void scale2d(TransMat2d, Pointf pvt, double sx, double sy);
-void translate2d(TransMat2d, double tx, double ty);
-
 bool rotateAxis3d(TransMat3d mat, int axis, double angle);
-void rotate3d(TransMat3d mat, Pointd axisp1, Pointd axisp2, double angle);
+void rotate3d(TransMat3d, Pointd axisp1, Pointd axisp2, double angle);
+void scale2d(TransMat2d, Pointd pvt, double sx, double sy);
+void scale3d(TransMat3d, Pointd pvt, double sx, double sy, double sz);
+void translate2d(TransMat2d, double tx, double ty);
+void translate3d(TransMat3d, double tx, double ty, double tz);
 
 void showMat3x3(TransMat2d);
-
-void transformEntity2d(TransMat2d mat, Entity<double>& ent);
+void showMat4x4(TransMat3d);
 
 #endif

@@ -1,7 +1,7 @@
 #ifndef _PRIMITIVES_H
 #define _PRIMITIVES_H
 
-#include "object_utility.h"
+#include "point_utility.h"
 #include "display_utility.h"
 #include <functional>
 #include <cmath>

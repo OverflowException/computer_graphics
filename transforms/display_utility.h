@@ -2,7 +2,7 @@
 #define _DISPLAY_UTILITY_H
 
 #include <GL/glut.h>
-#include "object_utility.h"
+#include "point_utility.h"
 #include <cmath>
 
 inline void setPixel(Pointi p)

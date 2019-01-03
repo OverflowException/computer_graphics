@@ -25,7 +25,7 @@ void rotate2d(TransMat2d mat, Pointd center, double angle)
 {
   double xc = center.x;
   double yc = center.y;
-
+  
   double rad = angle * M_PI / 180;
   double sine = sin(rad);
   double cosine = cos(rad);
@@ -158,6 +158,10 @@ void translate3d(TransMat3d mat, double tx, double ty, double tz)
   mat[2][3] = tz;
 }
 
+void scale3d(TransMat3d mat, Pointd pvt, double sx, double sy, double sz)
+{
+  std::cout << "3d scaling not yet implemented!" << std::endl;
+}
 
 void showMat3x3(TransMat2d mat)
 {
@@ -169,17 +173,13 @@ void showMat3x3(TransMat2d mat)
     }
 }
 
-
-//This transform function cannot deal with scaling of circle
-void transformEntity2d(TransMat2d mat, Entity<double>& ent)
+void showMat4x4(TransMat3d mat)
 {
-  double x, y;
-  for(Pointd& p : ent.verts)
+  for(int row = 0; row < 4; ++row)
     {
-      x = p.x;
-      y = p.y;
-      p.x = mat[0][0] * x + mat[0][1] * y + mat[0][2];
-      p.y = mat[1][0] * x + mat[1][1] * y + mat[1][2];
+      for(int col = 0; col < 4; ++col)
+	std::cout << mat[row][col] << "\t";
+      std::cout << std::endl;
     }
 }
 

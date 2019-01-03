@@ -7,11 +7,25 @@
 #include "primitives.h"
 #include "transforms.h"
 #include "arithmetics.h"
+#include "entity_utility.h"
 
 const int width = 640;
 const int height = 480;
 
 Entity<double> emulet;
+
+//This transform function cannot deal with scaling of circle
+void transformEntity2d(TransMat2d mat, Entity<double>& ent)
+{
+  double x, y;
+  for(Pointd& p : ent.verts)
+    {
+      x = p.x;
+      y = p.y;
+      p.x = mat[0][0] * x + mat[0][1] * y + mat[0][2];
+      p.y = mat[1][0] * x + mat[1][1] * y + mat[1][2];
+    }
+}
 
 //Constructs something like the Deathly Hallows in Harry Potter
 void construct(Entity<double>& ent)

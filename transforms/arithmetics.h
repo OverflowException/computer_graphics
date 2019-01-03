@@ -1,7 +1,7 @@
 #ifndef _ARITHMETICS_H
 #define _ARITHMETICS_H
 
-#include "object_utility.h"
+#include "point_utility.h"
 
 template<typename Point>
 Point segPoint(Point p1, Point p2, double m)
