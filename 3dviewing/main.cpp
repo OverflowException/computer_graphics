@@ -1,8 +1,9 @@
 #include <iostream>
 #include <unistd.h>
 #include <GL/glut.h>
-#include "ortho.cpp"
+#include "ortho.h"
 #include "../transforms/transforms.h"
+#include "../utilities/entity_utility.h"
 
 using namespace std;
 
@@ -46,7 +47,7 @@ void initTetra()
 
 void initTrans()
 {
-  rotate3d(tMat, {0, -100, 0}, {0, -100, -1}, 5);
+  rotate3d(tMat, {0, -100, 0}, {0, -100, 1}, 5);
   //showMat4x4(tMat);
 }
 

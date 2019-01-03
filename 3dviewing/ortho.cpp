@@ -1,5 +1,6 @@
 #include <cmath>
-#include "../transforms/point_utility.h"
+#include "ortho.h"
+#include "../utilities/point_utility.h"
 
 typedef Pointd Vec3d;
 
@@ -46,7 +47,7 @@ void setIdentityView(ViewMat3d mat)
 }
 
 //Perspective scaling cannot be represented linearly, thus cannot be multiplied into view matrix
-Pointd view(ViewMat3d mat, Pointd p, double pfactor = 0, double width = 1, double height = 1)
+Pointd view(ViewMat3d mat, Pointd p, double pfactor, double width, double height)
 { 
   double coord[3];
   for(int row = 0; row < 3; ++row)
