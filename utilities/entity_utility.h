@@ -25,7 +25,6 @@ struct Entity
   }edge_type;
   //typedef std::pair<vert_idx_type, vert_idx_type> edge_type;
 
-  color_type color;
   std::vector<vert_type> verts;
   std::vector<edge_type> edges;
   

@@ -7,17 +7,36 @@
 
 using namespace std;
 
+struct Camera
+{
+  Pointd pos;
+  Vec3d orient;
+  Vec3d horizon;
+  Vec3d vertical;
+  double pfactor;
+};
+
 int width = 640;
 int height = 480;
 
-void initTetra();
-void initTrans();
+Entity<double> ent;
+Entity<double> entScreen;
+
+Camera cam = {{200, 0, 0},
+	      {-1, 0, 0},
+	      {0, 1, 0},
+	      {0, 0, 1},
+	      0.2
+};
+
+void initEntity();
 void initDisplay();
+void orbitCamera(Camera& camera, double depthc, double vangle, double hangle);
+void displayEntity();
 void display();
 
 ViewMat3d vMat;
 TransMat3d tMat;
-Pointd tetra[4];
 
 int main(int argc, char** argv)
 {
@@ -27,8 +46,7 @@ int main(int argc, char** argv)
   glutInitDisplayMode(GLUT_SINGLE | GLUT_RGB);
   glutCreateWindow("Unamed");
 
-  initTetra();
-  initTrans();  
+  initEntity();
   initDisplay();
   glutDisplayFunc(display);
   //glutKeyboardFunc(/*Callback*/);
@@ -37,18 +55,37 @@ int main(int argc, char** argv)
   return 0;
 }
 
-void initTetra()
+void initEntity()
 {
-  tetra[0] = {-100.0, -100.0/sqrt(3), 0};
-  tetra[1] = {100.0, -100.0/sqrt(3), 0};
-  tetra[2] = {0, 200.0/sqrt(3), 0};
-  tetra[3] = {0, 0, 500.0 * sqrt(2) / 3.0};
-}
+  //Contruct a prism
+  ent.addVert({-100, -100, -50});
+  ent.addVert({100, -100, -50});
+  ent.addVert({100, 100, -50});
+  ent.addVert({-100, 100, -50});
 
-void initTrans()
-{
-  rotate3d(tMat, {0, -100, 0}, {0, -100, 1}, 5);
-  //showMat4x4(tMat);
+  ent.addVert({-80, -80, 50});
+  ent.addVert({80, -80, 50});
+  ent.addVert({80, 80, 50});
+  ent.addVert({-80, 80, 50});
+
+  decltype(ent)::color_type nred = {0, 1, 1};
+  decltype(ent)::color_type ngreen = {1, 0, 1};
+  decltype(ent)::color_type nblue = {1, 1, 0};
+  
+  ent.addEdge(0, 1, nblue);
+  ent.addEdge(1, 2, nblue);
+  ent.addEdge(2, 3, nblue);
+  ent.addEdge(3, 0, nblue);
+
+  ent.addEdge(4, 5, nred);
+  ent.addEdge(5, 6, nred);
+  ent.addEdge(6, 7, nred);
+  ent.addEdge(7, 4, nred);
+
+  ent.addEdge(0, 4, ngreen);
+  ent.addEdge(1, 5, ngreen);
+  ent.addEdge(2, 6, ngreen);
+  ent.addEdge(3, 7, ngreen);
 }
 
 void initDisplay()
@@ -61,39 +98,61 @@ void initDisplay()
   gluOrtho2D(-(GLdouble)width / 2, (GLdouble)width / 2, -(GLdouble)height / 2, (GLdouble)height / 2);
   //Init view matrix
   ortho3d(vMat,
-	  {0, 100, 100},
-	  {0, -1, -1},
-	  {-1, 0, 0});
+	  cam.pos,
+	  cam.orient,
+	  cam.horizon);
+  
+  //Init transform matrix
+  setIdentity3d(tMat);
+}
+
+void orbitCamera(Camera& cam, double depthc, double vangle, double hangle)
+{
+  Pointd center = add(cam.pos, mul(cam.orient, depthc));
+  TransMat3d mat;
+  if(vangle != 0)
+    {
+      rotate3d(mat, center, sub(center, cam.horizon), vangle);
+      cam.pos = transform3d(mat, cam.pos);
+      cam.orient = transform3d(mat, cam.orient);
+      cam.vertical = transform3d(mat, cam.vertical);
+    }
+  if(hangle != 0)
+    {
+      rotate3d(mat, center, add(center, cam.vertical), hangle);
+      cam.pos = transform3d(mat, cam.pos);
+      cam.orient = transform3d(mat, cam.orient);
+      cam.horizon = transform3d(mat, cam.horizon);
+    }
+}
+
+void displayEntity()
+{
+  entScreen = ent;
+
+  //Update view matrix
+  ortho3d(vMat, cam.pos, cam.orient, cam.horizon);
+
+  //Calculate entity on sreen
+  for(int idx = 0; idx < ent.verts.size(); ++idx)
+    entScreen.verts[idx] = view(vMat, transform3d(tMat, ent.verts[idx]), cam.pfactor, width, height);
+
+  //Draw entity on screen
+  glBegin(GL_LINES);
+  for(const typename decltype(entScreen)::edge_type& e : entScreen.edges)
+    { 
+      glColor3fv((GLfloat*)&e.color);
+      glVertex2d(entScreen.verts[e.start].x, entScreen.verts[e.start].y);
+      glVertex2d(entScreen.verts[e.end].x, entScreen.verts[e.end].y);
+    }
+  glEnd();
+  glFlush();
 }
 
 void display()
 {
-  Pointd screenTetra[4];
-  
-  while(true)
-    {
-      for(int idx = 0; idx < 4; ++idx)
-	{
-	  //Apply transformations
-	  tetra[idx] = transform3d(tMat, tetra[idx]);
-	  //View on screen
-	  screenTetra[idx] = view(vMat, tetra[idx], 0.2, width, height);
-	}
-
-      //No depth detection involved
-      //Depth detection can be implemented by checking Z coodinate of screen coordinates. Negative value is 'behind' camera
-      glClear(GL_COLOR_BUFFER_BIT);
-      glColor3f(1, 1, 1);
-      for(int idx1 = 0; idx1 < 4; ++idx1)
-	for(int idx2 = idx1 + 1; idx2 < 4; ++idx2)
-	  {
-	    glBegin(GL_LINES);
-	    glVertex2d(screenTetra[idx1].x, screenTetra[idx1].y);
-	    glVertex2d(screenTetra[idx2].x, screenTetra[idx2].y);
-	    glEnd();
-	  }
-      
-      glFlush();
-      usleep(100000);
-    }
+  //No depth detection involved
+  //Depth detection can be implemented by checking Z coodinate of screen coordinates. Negative value is 'behind' camera
+  glClear(GL_COLOR_BUFFER_BIT);
+  displayEntity();      
 }
