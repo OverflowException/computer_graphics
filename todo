@@ -1,4 +1,4 @@
-1. Test if 3d rotation works
+1. Add mouse interaction and perspective factor to 3d viewing, this should involve 3d transformations
 2. Test if Bezier surface works
 3. See if 3D viewing works
 4. Advanced Perlin noise

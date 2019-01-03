@@ -9,7 +9,7 @@ struct Point3d
 
 typedef Point3d Vec3d;
 
-typedef double ViewMat3d [3][3];
+typedef double ViewMat3d [4][4];
 
 Vec3d add(const Vec3d& v1, const Vec3d& v2)
 {
@@ -44,6 +44,22 @@ void unify(Vec3d& v)
   v.x /= d; v.y /= d; v.z /= d;
 }
 
+void setIdentityView(ViewMat3d mat)
+{
+  for(int row = 0; row < 4; ++row)
+    for(int col = 0; col < 4; ++col)
+      mat[row][col] = (row == col);
+}
+
+Point3d view(ViewMat3d mat, Point3d p /*perspective factor*/)
+{
+  double coord[3];
+  for(int row = 0; row < 3; ++row)
+    coord[row] = p.x * mat[row][0] + p.y * mat[row][1] + p.z * mat[row][2] + mat[row][3];
+
+  return {coord[0], coord[1], coord[2]};
+}
+
 //orient and horizon dont necessarily be unit
 //they are not necessarily perpendicular. Horizontal plane is determined by by these 2 vectors 
 void ortho3d(ViewMat3d mat, Point3d pos, Vec3d orient, Vec3d horizon)
@@ -55,7 +71,8 @@ void ortho3d(ViewMat3d mat, Point3d pos, Vec3d orient, Vec3d horizon)
   unify(horizon);
   Vec3d vert = cross(horizon, orient);
 
-  //////////////
+  setIdentityView(mat);
+  //Camera orientation
   mat[0][0] = horizon.x;
   mat[0][1] = horizon.y;
   mat[0][2] = horizon.z;
@@ -67,6 +84,11 @@ void ortho3d(ViewMat3d mat, Point3d pos, Vec3d orient, Vec3d horizon)
   mat[2][0] = orient.x;
   mat[2][1] = orient.y;
   mat[2][2] = orient.z;
-  
+
+  //Camera position
+  pos = view(mat, pos);
+  mat[0][3] = -pos.x;
+  mat[1][3] = -pos.y;
+  mat[2][3] = -pos.z;
 }
 
