@@ -1,10 +1,7 @@
 #ifndef _OBJECT_UTILITY_H
 #define _OBJECT_UTILITY_H
 
-#include <vector>
-#include <utility>
 #include <cmath>
-
 
 template<typename T>
 struct Point_;

@@ -57,11 +57,13 @@ void setIdentity3d(TransMat3d mat)
       mat[row][col] = (row == col);
 }
 
+//Rotate around axis. Rotation direction is the positive direction of corresponding axis
 bool rotateAxis3d(TransMat3d mat, int axis, double angle)
 {
   setIdentity3d(mat);
-  double sine = sin(angle);
-  double cosine = cos(angle);
+  double rad = angle * M_PI / 180;
+  double sine = sin(rad);
+  double cosine = cos(rad);
   //The 4 indices that will be set to sine or cosine values
   int idx1 = 0, idx2 = 0;
   
@@ -74,7 +76,7 @@ bool rotateAxis3d(TransMat3d mat, int axis, double angle)
       
       //y axis
     case 0x010:
-      idx1 = 0; idx2 = 2;
+      idx1 = 2; idx2 = 0;
       break;
       
       //z axis
@@ -84,7 +86,6 @@ bool rotateAxis3d(TransMat3d mat, int axis, double angle)
       
     default:
       return false;
-      break;
     }
 
   mat[idx1][idx1] = cosine;
@@ -96,58 +97,79 @@ bool rotateAxis3d(TransMat3d mat, int axis, double angle)
 
 void rotate3d(TransMat3d mat, Pointd axisp1, Pointd axisp2, double angle)
 {
+  TransMat3d mToOrigin;
+  translate3d(mToOrigin, -axisp1.x, -axisp1.y, -axisp1.z);
+  
   double x = axisp2.x - axisp1.x;
   double y = axisp2.y - axisp1.y;
   double z = axisp2.z - axisp1.z;
 
-  unsigned char axisCode = 0;
+  //Check if rotation axis is parallel to x, y or z
+  int axisCode = 0;
   if(x != 0)
-    axisCode |= 0x001;
+    {
+      axisCode |= 0x001;
+      if(x < 0)
+	angle = -angle;
+    }
   if(y != 0)
-    axisCode |= 0x010;
+    {
+      axisCode |= 0x010;
+      if(y < 0)
+	angle = -angle;
+    }
   if(z != 0)
-    axisCode |= 0x100;
+    {
+      axisCode |= 0x100;
+      if(z < 0)
+	angle = -angle;
+    }
 
-  if(rotateAxis3d(mat, axisCode, angle))
-    return;
+  if(!rotateAxis3d(mat, axisCode, angle))
+    {
+      double x2 = x*x, y2 = y*y;
+      double dxy = sqrt(x2  + y2);
+      double d = sqrt(x2 + y2 + z*z);
+      
+      //prefix c stands for cosine, s stands for sine
+      double ctheta = x / dxy, stheta = y / dxy;
+      double cphi = z / d, sphi = dxy / d;
   
-  double x2 = x*x, y2 = y*y;
-  double dxy = sqrt(x2  + y2);
-  double d = sqrt(x2 + y2 + z*z);
-
-  //prefix c stands for cosine, s stands for sine
-  double ctheta = x / dxy, stheta = y / dxy;
-  double cphi = z / d, sphi = dxy / d;
-
-  //Generate a mat which rotate to Z axis
-  TransMat3d mToAxis;
-  setIdentity3d(mToAxis);
-  mToAxis[0][0] = ctheta * cphi;
-  mToAxis[0][1] = stheta * cphi;
-  mToAxis[0][2] = -sphi;
+      //Generate a mat which rotate to Z axis
+      TransMat3d mToAxis;
+      setIdentity3d(mToAxis);
+      mToAxis[0][0] = ctheta * cphi;
+      mToAxis[0][1] = stheta * cphi;
+      mToAxis[0][2] = -sphi;
   
-  mToAxis[1][0] = -stheta;
-  mToAxis[1][1] = ctheta;
+      mToAxis[1][0] = -stheta;
+      mToAxis[1][1] = ctheta;
 
-  mToAxis[2][0] = ctheta * sphi;
-  mToAxis[2][1] = stheta * sphi;
-  mToAxis[2][2] = cphi;
+      mToAxis[2][0] = ctheta * sphi;
+      mToAxis[2][1] = stheta * sphi;
+      mToAxis[2][2] = cphi;
 
-  //Generate a mat which rotates around Z axis
-  TransMat3d mAroundAxis;
-  rotateAxis3d(mAroundAxis, 0x100, angle);
-
-  //Rotate to Z, rotate around Z, rotate from Z
-  setIdentity3d(mat);
-  matMul(mToAxis, mat, mat, 4, 4, 4);
-  matMul(mAroundAxis, mat, mat, int(4), int(4), int(4));
+      //Generate a mat which rotates around Z axis
+      TransMat3d mAroundAxis;
+      rotateAxis3d(mAroundAxis, 0x100, angle);
   
-  mToAxis[0][1] = 0 - mToAxis[0][1];
-  mToAxis[0][2] = 0 - mToAxis[0][2];
-  mToAxis[1][0] = 0 - mToAxis[1][0];
-  mToAxis[2][0] = 0 - mToAxis[2][0];
+      //Rotate to Z, rotate around Z, rotate from Z
+      compositeTrans3d(mToAxis, mat, mat);
+      compositeTrans3d(mAroundAxis, mat, mat);
 
-  matMul(mToAxis, mat, mat, 4, 4, 4);
+      //Inverse matrix. Equivalent to transpose for diagonal matrix
+      std::swap(mToAxis[0][1], mToAxis[1][0]);
+      std::swap(mToAxis[0][2], mToAxis[2][0]);
+      std::swap(mToAxis[1][2], mToAxis[2][1]);
+
+      compositeTrans3d(mToAxis, mat, mat);
+    }
+  
+  compositeTrans3d(mat, mToOrigin, mat);
+  mToOrigin[0][3] = -mToOrigin[0][3];
+  mToOrigin[1][3] = -mToOrigin[1][3];
+  mToOrigin[2][3] = -mToOrigin[2][3];
+  compositeTrans3d(mToOrigin, mat, mat);  
 }
 
 void translate3d(TransMat3d mat, double tx, double ty, double tz)
@@ -161,6 +183,52 @@ void translate3d(TransMat3d mat, double tx, double ty, double tz)
 void scale3d(TransMat3d mat, Pointd pvt, double sx, double sy, double sz)
 {
   std::cout << "3d scaling not yet implemented!" << std::endl;
+}
+
+
+void compositeTrans2d(TransMat2d m1, TransMat2d m2, TransMat2d mr)
+{
+  TransMat2d mtmp;
+  for(int row = 0; row < 3; ++row)
+    for(int col = 0; col < 3; ++col)
+      {
+	mtmp[row][col] = 0;
+	for(int idx = 0; idx < 3; ++idx)
+	  mtmp[row][col] += m1[row][idx] * m2[idx][col];
+      }
+
+  matCopy(mtmp, mr, 3, 3);
+}
+
+
+void compositeTrans3d(TransMat3d m1, TransMat3d m2, TransMat3d mr)
+{
+  TransMat3d mtmp;
+  for(int row = 0; row < 4; ++row)
+    for(int col = 0; col < 4; ++col)
+      {
+	mtmp[row][col] = 0;
+	for(int idx = 0; idx < 4; ++idx)
+	  mtmp[row][col] += m1[row][idx] * m2[idx][col];
+      }
+
+  matCopy(mtmp, mr, 4, 4);
+}
+
+
+Pointd transform2d(TransMat3d mat, Pointd p)
+{
+  return
+    {p.x * mat[0][0] + p.y * mat[0][1] + mat[0][2],
+      p.x * mat[1][0] + p.y * mat[1][1] + mat[1][2]};
+}
+
+Pointd transform3d(TransMat3d mat, Pointd p)
+{
+  return
+    {p.x * mat[0][0] + p.y * mat[0][1] + p.z * mat[0][2] + mat[0][3],
+      p.x * mat[1][0] + p.y * mat[1][1] + p.z * mat[1][2] + mat[1][3],
+      p.x * mat[2][0] + p.y * mat[2][1] + p.z * mat[2][2] + mat[2][3]};
 }
 
 void showMat3x3(TransMat2d mat)

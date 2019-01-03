@@ -1,13 +1,7 @@
 #include <cmath>
+#include "../transforms/point_utility.h"
 
-struct Point3d
-{
-  double x;
-  double y;
-  double z;
-};
-
-typedef Point3d Vec3d;
+typedef Pointd Vec3d;
 
 typedef double ViewMat3d [4][4];
 
@@ -51,18 +45,29 @@ void setIdentityView(ViewMat3d mat)
       mat[row][col] = (row == col);
 }
 
-Point3d view(ViewMat3d mat, Point3d p /*perspective factor*/)
-{
+//Perspective scaling cannot be represented linearly, thus cannot be multiplied into view matrix
+Pointd view(ViewMat3d mat, Pointd p, double pfactor = 0, double width = 1, double height = 1)
+{ 
   double coord[3];
   for(int row = 0; row < 3; ++row)
     coord[row] = p.x * mat[row][0] + p.y * mat[row][1] + p.z * mat[row][2] + mat[row][3];
 
-  return {coord[0], coord[1], coord[2]};
+  if(width == 0 || height == 0)
+    return {coord[0], coord[1], coord[2]};
+  else
+    {
+      double scale = 2 * pfactor * coord[2];
+      return {
+	coord[0] * width / (width +  scale),
+	  coord[1] * height / (height + scale),
+	  coord[2]};
+    }
+  
 }
 
 //orient and horizon dont necessarily be unit
 //they are not necessarily perpendicular. Horizontal plane is determined by by these 2 vectors 
-void ortho3d(ViewMat3d mat, Point3d pos, Vec3d orient, Vec3d horizon)
+void ortho3d(ViewMat3d mat, Pointd pos, Vec3d orient, Vec3d horizon)
 {
   //Unify orient
   unify(orient);

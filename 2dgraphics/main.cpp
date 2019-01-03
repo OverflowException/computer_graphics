@@ -5,14 +5,24 @@
 #include <cmath>
 #include "display_utility.h"
 #include "primitives.h"
-#include "transforms.h"
+#include "../transforms/transforms.h"
 #include "arithmetics.h"
-#include "entity_utility.h"
+#include "../utilities/entity_utility.h"
 
 const int width = 640;
 const int height = 480;
 
 Entity<double> emulet;
+
+template<typename Entity>
+void drawEntity(const Entity& ent)
+{ 
+  for(const typename Entity::edge_type& e : ent.edges)
+    {
+      glColor3fv((GLfloat*)&e.color);
+      drawLine(ent.verts[e.start], ent.verts[e.end]);
+    }
+}
 
 //This transform function cannot deal with scaling of circle
 void transformEntity2d(TransMat2d mat, Entity<double>& ent)
@@ -42,13 +52,12 @@ void construct(Entity<double>& ent)
   ent.addVert(p3);
   ent.addVert(center);
 
-  ent.addEdge(0, 2);
-  ent.addEdge(0, 3);
-  ent.addEdge(1, 3);
-  ent.addEdge(2, 3);
-  ent.addCircle(4, center.y);
-
-  ent.setColor(1, 1, 0);
+  decltype(emulet)::color_type yellow = {1, 1, 0};
+  
+  ent.addEdge(0, 2, yellow);
+  ent.addEdge(0, 3, yellow);
+  ent.addEdge(1, 3, yellow);
+  ent.addEdge(2, 3, yellow);
 }
 
 void init()
@@ -74,12 +83,6 @@ void display()
       usleep(100000);
     }
 }
-
-// void display()
-// {
-//   drawLine(Pointd(0.15, 0.33), Pointd(12.33, 5.78));
-//   glFlush();
-// }
 
 int main(int argc, char** argv)
 {  

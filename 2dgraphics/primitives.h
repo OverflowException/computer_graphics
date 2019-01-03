@@ -1,7 +1,7 @@
 #ifndef _PRIMITIVES_H
 #define _PRIMITIVES_H
 
-#include "point_utility.h"
+#include "../utilities/point_utility.h"
 #include "display_utility.h"
 #include <functional>
 #include <cmath>
@@ -142,18 +142,6 @@ void drawElipse(Point center, Tr rx, Tr ry)
       dx += twory2;
     }
   glEnd();
-}
-
-template<typename Entity>
-void drawEntity(const Entity& ent)
-{
-  glColor3fv(ent.color);
-  
-  for(const typename Entity::edge_type& e : ent.edges)
-    drawLine(ent.verts[e.first], ent.verts[e.second]);
-
-  for(const typename Entity::circle_type& c : ent.circles)
-    drawCircle(ent.verts[c.first], c.second);
 }
 
 
