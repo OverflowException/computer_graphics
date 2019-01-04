@@ -34,4 +34,7 @@ Pointd transform3d(TransMat3d, Pointd);
 void showMat3x3(TransMat2d);
 void showMat4x4(TransMat3d);
 
+void cleanError3x3(TransMat2d, double threshold);
+void cleanError4x4(TransMat3d, double threshold);
+
 #endif

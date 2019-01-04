@@ -251,3 +251,18 @@ void showMat4x4(TransMat3d mat)
     }
 }
 
+void cleanError3x3(TransMat2d mat, double threshold)
+{
+  for(int row = 0; row < 3; ++row)
+    for(int col = 0; col < 3; ++col)
+      if(fabs(mat[row][col]) < threshold)
+	mat[row][col] = 0.0;
+}
+
+void cleanError4x4(TransMat3d mat, double threshold)
+{
+  for(int row = 0; row < 4; ++row)
+    for(int col = 0; col < 4; ++col)
+      if(fabs(mat[row][col]) < threshold)
+	mat[row][col] = 0.0;
+}
