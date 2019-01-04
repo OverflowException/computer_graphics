@@ -1,43 +1,7 @@
 #include <cmath>
 #include "ortho.h"
-#include "../utilities/point_utility.h"
-
-typedef Pointd Vec3d;
 
 typedef double ViewMat3d [4][4];
-
-Vec3d add(const Vec3d& v1, const Vec3d& v2)
-{
-  return {v1.x + v2.x, v1.y + v2.y, v1.z + v2.z};
-}
-
-Vec3d sub(const Vec3d& v1, const Vec3d& v2)
-{
-  return {v1.x - v2.x, v1.y - v2.y, v1.z - v2.z};
-}
-
-Vec3d mul(const Vec3d& v, double k)
-{
-  return {k * v.x, k * v.y, k * v.z};
-}
-
-Vec3d cross(const Vec3d& v1, const Vec3d& v2)
-{
-  return { v1.y * v2.z - v1.z * v2.y,
-      v1.z * v2.x - v1.x * v2.z,
-      v1.x * v2.y - v1.y * v2.x};
-}
-
-double dot(const Vec3d& v1, const Vec3d& v2)
-{
-  return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
-}
-
-void unify(Vec3d& v)
-{
-  double d = sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
-  v.x /= d; v.y /= d; v.z /= d;
-}
 
 void setIdentityView(ViewMat3d mat)
 {

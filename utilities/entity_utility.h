@@ -1,3 +1,6 @@
+#ifndef _ENTITY_UTILITY_H
+#define _ENTITY_UTILITY_H
+
 #include "point_utility.h"
 #include <utility>
 #include <vector>
@@ -38,3 +41,6 @@ struct Entity
     edges.push_back({id1, id2, color});
   }
 };
+
+
+#endif

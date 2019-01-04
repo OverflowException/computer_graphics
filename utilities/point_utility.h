@@ -1,5 +1,5 @@
-#ifndef _OBJECT_UTILITY_H
-#define _OBJECT_UTILITY_H
+#ifndef _POINT_UTILITY_H
+#define _POINT_UTILITY_H
 
 #include <cmath>
 
