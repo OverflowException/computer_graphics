@@ -1,5 +1,6 @@
 #include <cmath>
 #include "ortho.h"
+#include "../transforms/transforms.h"
 
 typedef double ViewMat3d [4][4];
 
@@ -55,10 +56,9 @@ void ortho3d(ViewMat3d mat, Pointd pos, Vec3d orient, Vec3d horizon)
   mat[2][1] = orient.y;
   mat[2][2] = orient.z;
 
-  //Camera position
-  pos = view(mat, pos);
-  mat[0][3] = -pos.x;
-  mat[1][3] = -pos.y;
-  mat[2][3] = -pos.z;
+  TransMat3d transMat;
+  translate3d(transMat, -pos.x, -pos.y, -pos.z);
+  
+  compositeTrans3d(mat, transMat, mat);
 }
 

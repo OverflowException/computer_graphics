@@ -40,6 +40,7 @@ Camera cam =
     1.0
   };
 
+
 MouseAction mAct =
   {
     -1, false, 0, 0
@@ -228,7 +229,6 @@ void motionHandler(int x, int y)
       rotate3d(tmpMat, {0, 0, 0}, cam.vertical, dx); //horizontal rotation
       rotate3d(tMat, {0, 0, 0}, sub({0, 0, 0}, cam.horizon), dy); //vertical rotation
       compositeTrans3d(tmpMat, tMat, tMat);
-
     }
 
   //Right button down
