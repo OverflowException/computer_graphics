@@ -31,15 +31,14 @@ Pointd view(ViewMat3d mat, Pointd p, double pfactor, double width, double height
   
 }
 
-//orient and horizon dont necessarily be unit
-//they are not necessarily perpendicular. Horizontal plane is determined by by these 2 vectors 
+//orient and horizon should be unit and perpendicular
 void ortho3d(ViewMat3d mat, Pointd pos, Vec3d orient, Vec3d horizon)
 {
-  //Unify orient
-  unify(orient);
-  //horizon's projection on unit orient
-  horizon = sub(horizon, mul(orient, dot(orient, horizon)));
-  unify(horizon);
+  // //Unify orient
+  // unify(orient);
+  // //horizon's projection on unit orient
+  // horizon = sub(horizon, mul(orient, dot(orient, horizon)));
+  // unify(horizon);
   Vec3d vert = cross(horizon, orient);
 
   setIdentityView(mat);

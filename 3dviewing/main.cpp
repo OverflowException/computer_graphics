@@ -14,6 +14,7 @@ bool mouseDown = false;
 Entity<double> ent;
 Entity<double> entScreen;
 
+//A structure representing camera placement
 struct Camera
 {
   Pointd pos;
@@ -21,6 +22,7 @@ struct Camera
   Vec3d horizon;
   Vec3d vertical;
   double pfactor;
+  ViewMat3d vmat;
 };
 
 struct MouseAction
@@ -33,13 +35,12 @@ struct MouseAction
 
 Camera cam =
   {
-    {0, 0, 200},
-    {0, 0, -1},
-    {1, 0, 0},
-    {0, 1, 0},
+    {200, 200, 200},
+    {-1/sqrt(3), -1/sqrt(3), -1/sqrt(3)},
+    {-1/sqrt(2), 1/sqrt(2), 0},
+    {-1/sqrt(6), -1/sqrt(6), 2/sqrt(6)},
     1.0
   };
-
 
 MouseAction mAct =
   {
@@ -48,15 +49,11 @@ MouseAction mAct =
 
 void initEntity();
 void initDisplay();
-Camera orbitCamera(Camera cam, double depthc, double vangle, double hangle);
-void transformEntity();
+void rotateView(Camera& cam, Pointd center, double hangle, double vangle);
 void drawEntity();
 void display();
 void mouseHandler(int button, int state, int x, int y);
 void motionHandler(int x, int y);
-
-ViewMat3d vMat;
-TransMat3d tMat;
 
 int main(int argc, char** argv)
 {
@@ -118,52 +115,62 @@ void initDisplay()
   //gluOrtho2D(0.0, (GLdouble)width, 0.0, (GLdouble)height);
   gluOrtho2D(-(GLdouble)width / 2, (GLdouble)width / 2, -(GLdouble)height / 2, (GLdouble)height / 2);
   //Init view matrix
-  ortho3d(vMat,
+  ortho3d(cam.vmat,
 	  cam.pos,
 	  cam.orient,
 	  cam.horizon);
+}
+
+void rotateView(Camera& cam, Pointd center, double hangle, double vangle)
+{
+  TransMat3d htrans, vtrans;
+  if(hangle == 0.0 && vangle == 0.0)
+    {
+      std::cout << "No movement" << std::endl;
+      return;
+    }
   
-  //Init transform matrix
-  setIdentity3d(tMat);
-}
+  if(hangle != 0.0)
+    {
+      rotate3d(htrans, center, add(center, cam.vertical), hangle);
+      compositeTrans3d(cam.vmat, htrans, cam.vmat);
+    }
+  if(vangle != 0.0)
+    {
+      rotate3d(vtrans, center, sub(center, cam.horizon), vangle);
+      compositeTrans3d(cam.vmat, vtrans, cam.vmat);
+    }
+  
+  //Set new camera placement 
+  cam.horizon.x = cam.vmat[0][0];
+  cam.horizon.y = cam.vmat[0][1];
+  cam.horizon.z = cam.vmat[0][2];
 
-//This function is pretty fucked up
-Camera orbitCamera(Camera cam, double depthc, double vangle, double hangle)
-{
-  Pointd center = add(cam.pos, mul(cam.orient, depthc));
-  TransMat3d vTransMat, hTransMat, mat;
-  rotate3d(vTransMat, center, sub(center, cam.horizon), vangle);
-  rotate3d(hTransMat, center, add(center, cam.vertical), hangle);
+  cam.vertical.x = cam.vmat[1][0];
+  cam.vertical.y = cam.vmat[1][1];
+  cam.vertical.z = cam.vmat[1][2];
+ 
+  cam.orient.x = cam.vmat[2][0];
+  cam.orient.y = cam.vmat[2][1];
+  cam.orient.z = cam.vmat[2][2];
+  
+  //Set new camera position
+  TransMat3d ptrans;
+  setIdentity3d(ptrans);
+  for(int row = 0; row < 3; ++row)
+    for(int col = 0; col < 3; ++col)
+      ptrans[row][col] = -cam.vmat[col][row];
 
-  compositeTrans3d(vTransMat, hTransMat, hTransMat);
-  cleanError4x4(hTransMat, 10E-6);
-
-  Camera rcam;
-  rcam.pos = transform3d(hTransMat, cam.pos);
-  rcam.orient = transform3d(hTransMat, cam.orient);
-  rcam.horizon = transform3d(hTransMat, cam.horizon);
-  rcam.vertical = transform3d(hTransMat, cam.vertical);
-  rcam.pfactor = cam.pfactor;
-  return rcam;
-}
-
-
-void transformEntity()
-{
-  for(int idx = 0; idx < ent.verts.size(); ++idx)
-    ent.verts[idx] = transform3d(tMat, ent.verts[idx]);
+  cam.pos = transform3d(ptrans, Pointd(cam.vmat[0][3], cam.vmat[1][3], cam.vmat[2][3]));
 }
 
 void drawEntity()
 {
   entScreen = ent;
 
-  //Update view matrix
-  ortho3d(vMat, cam.pos, cam.orient, cam.horizon);
-
   //Calculate entity on sreen
   for(int idx = 0; idx < ent.verts.size(); ++idx)
-    entScreen.verts[idx] = view(vMat, ent.verts[idx], cam.pfactor, width, height);
+    entScreen.verts[idx] = view(cam.vmat, ent.verts[idx], cam.pfactor, width, height);
 
   //Draw entity on screen
   glBegin(GL_LINES);
@@ -187,7 +194,6 @@ void display()
   //Depth detection can be implemented by checking Z coodinate of screen coordinates. Negative value is 'behind' camera
 
   glClear(GL_COLOR_BUFFER_BIT);
-  transformEntity();
   drawEntity();
 }
 
@@ -221,20 +227,16 @@ void motionHandler(int x, int y)
   y = height - y;
   std::cout << "motion x = " << x << ", y = " << y << std::endl;
 
-  TransMat3d tmpMat;
   int dx = x - mAct.x, dy = y - mAct.y;
   //Left button down
   if(mAct.btn == 0)
     {
-      rotate3d(tmpMat, {0, 0, 0}, cam.vertical, dx); //horizontal rotation
-      rotate3d(tMat, {0, 0, 0}, sub({0, 0, 0}, cam.horizon), dy); //vertical rotation
-      compositeTrans3d(tmpMat, tMat, tMat);
+      rotateView(cam, {0, 0, 0}, dx, dy);
     }
 
   //Right button down
   else if(mAct.btn == 2)
     {
-      translate3d(tMat, dx, dy, 0);
     }
 
 
