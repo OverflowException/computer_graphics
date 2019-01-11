@@ -7,8 +7,6 @@
 int width = 640;
 int height = 480;
 int radius = 50;
-int centerx = width / 2;
-int centery = height / 2;
 
 #define TWO_PI 6.28318530718f
 #define N 64
@@ -50,11 +48,11 @@ Result subtractOp(Result a, Result b)
 
 Result scene(float x, float y)
 {
-  Result r1 = {circleSDF(x, y, 250, 150, 40), 2.0};
+  Result r1 = {circleSDF(x, y, 350, 200, 40), 2.0};
   Result r2 = {circleSDF(x, y, 250, 250, 40), 4.0};
   Result r3 = {circleSDF(x, y, 290, 250, 20), 0.5};
   
-  return unionOp(subtractOp(r2, r3), r1);
+  return unionOp(unionOp(r2, r3), r1);
 }   
 
 //Ray marching method of ray tracing
